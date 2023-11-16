@@ -31,6 +31,9 @@ namespace MobFDB.Repository
 
         public async Task<Product> PostProduct(Product product)
         {
+            product.DeliveryDate = DateTime.Now.AddDays(1);
+            /*   product.DeliveryDate = product.OrderDate?.AddDays(2) ?? DateTime.Now.AddDays(2);*/
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
             return product;

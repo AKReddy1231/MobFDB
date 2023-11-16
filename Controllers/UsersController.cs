@@ -47,6 +47,7 @@ namespace MobFDB.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

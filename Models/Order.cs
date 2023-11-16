@@ -12,6 +12,11 @@ namespace MobFDB.Models
         public DateTime? OrderDate { get; set; }
         public decimal? TotalAmount { get; set; }
         public int? Quantity { get; set; }
+      
+
+        public string PaymentMethod { get; set; }
+        public string OrderStatus { get; set; } // Pending, Shipped, Delivered, etc
+        
 
         public virtual Product? Product { get; set; }
         public virtual User? User { get; set; }

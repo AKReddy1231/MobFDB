@@ -14,7 +14,7 @@ namespace MobFDB.Models
         public decimal? Price { get; set; }
         public string? OffersAndDiscounts { get; set; }
         public DateTime? DeliveryDate { get; set; }
-        public string? BillingMethod { get; set; }
+        /*public string? BillingMethod { get; set; }*/
         public byte? CustomerCareSupport { get; set; }
         public byte? CancelAndReturnPolicy { get; set; }
 

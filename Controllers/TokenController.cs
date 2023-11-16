@@ -44,7 +44,8 @@ namespace MobFDB.Controllers
         private string GenerateTokens(User user)
         {
             var claims = new[] {
-             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
+             new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+             new Claim(ClaimTypes.Role,user.Role)
             };
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_userService["Jwt:Key"]));
             var credentials = new SigningCredentials(securitykey, SecurityAlgorithms.HmacSha256);

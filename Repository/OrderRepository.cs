@@ -61,7 +61,7 @@ namespace MobFDB.Repository
             {
                 throw new Exception("Invalid discount format");
             }
-            if (order.OrderDate.HasValue)
+           /* if (order.OrderDate.HasValue)
             {
                
                 order.Product.DeliveryDate = order.OrderDate.Value.AddDays(2);
@@ -69,12 +69,20 @@ namespace MobFDB.Repository
             else
             {
                 throw new Exception("OrderDate is null");
-            }
+            }*/
 
             /*order.Product.DeliveryDate = order.OrderDate.AddDays(2);*/
+            order.PaymentMethod = "Credit Card"; // You can replace this with actual logic
+            order.OrderStatus = "Shipping";
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+            if (DateTime.Now.Date >= order.Product.DeliveryDate?.Date)
+            {
+                // Update the order status to "Delivered"
+                order.OrderStatus = "Delivered";
+                await _context.SaveChangesAsync();
+            }
 
             return order;
         }
