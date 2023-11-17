@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,7 @@ namespace MobFDB.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-
+        private readonly PasswordHasher<string> _passwordHasher = new PasswordHasher<string>();
         private readonly IConfiguration _userService;
         private readonly MobDbContext _context;
 
@@ -25,26 +26,28 @@ namespace MobFDB.Controllers
             _userService = userService;
             _context = context;
         }
-        private bool VerifyPassword(Login model, string enteredPassword)
+        private bool VerifyPassword(string model, string enteredPassword)
         {
-            if (model.Password == enteredPassword)
+            if (_passwordHasher.VerifyHashedPassword(null, model, enteredPassword) == PasswordVerificationResult.Success)
+            {
                 return true;
-
+            }
             return false;
         }
         private User AuthenticateCustomer(Login model)
         {
             var user = _context.Users.FirstOrDefault(o => o.EmailAddress == model.EmailAddress);
-            if (user == null || !VerifyPassword(model, user.Password))
+            if (user == null || !VerifyPassword(user.Password, model.Password))
             {
                 return null;
             }
             return user;
+
         }
         private string GenerateTokens(User user)
         {
             var claims = new[] {
-             new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+             new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
              new Claim(ClaimTypes.Role,user.Role)
             };
             var securitykey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_userService["Jwt:Key"]));
@@ -81,24 +84,18 @@ namespace MobFDB.Controllers
             {
                 return BadRequest("Email already exists");
             }
- 
             // Remove password hashing
             // registerModel.Password = BCrypt.Net.BCrypt.HashPassword(registerModel.Password);
- 
             _context.Users.Add(registerModel);
             await _context.SaveChangesAsync();
- 
             var token = GenerateJwtToken(registerModel);
- 
             return Ok(new { token });
         }
- 
- 
+
         private async Task<User> GetUser(string email, string password)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.EmailAddress == email && u.Password == password);
         }
- 
         private string GenerateJwtToken(User user)
         {
             // create claims details based on the user information
@@ -116,7 +113,6 @@ namespace MobFDB.Controllers
                 new Claim(ClaimTypes.Role,  user.Role) // Include the user's role
                 // Add other claims as needed
             };
- 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(
@@ -125,7 +121,6 @@ namespace MobFDB.Controllers
                 claims,
                 expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: signIn);
- 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

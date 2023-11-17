@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using MobFDB.Interface;
 using MobFDB.Models;
 using System.Security.Cryptography;
@@ -9,7 +11,7 @@ namespace MobFDB.Repository
     public class UserRepository : IUserRepository
     {
         private readonly MobDbContext _context;
-
+        private readonly PasswordHasher<string> _passwordHasher = new PasswordHasher<string>();
         public UserRepository(MobDbContext context)
         {
             _context = context;
@@ -33,6 +35,8 @@ namespace MobFDB.Repository
 
         public async Task<User> PostUser(User user)
         {
+            string encryptedPasssword = _passwordHasher.HashPassword(null, user.Password);
+            user.Password = encryptedPasssword;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 

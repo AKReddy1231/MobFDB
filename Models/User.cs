@@ -23,7 +23,10 @@ namespace MobFDB.Models
         public string MobileNumber { get; set; }
         [Required]
         public string Password { get; set; }
-        
+
+
+        /*public string Salt { get; set; }*/
+
 
         public string? Role { get; set; }
 
