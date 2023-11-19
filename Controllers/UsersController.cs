@@ -24,7 +24,8 @@ namespace MobFDB.Controllers
         }
 
         [HttpGet]
-       /* [Authorize(Roles = "Admin")]*/
+        [AllowAnonymous]
+        /* [Authorize(Roles = "Admin")]*/
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var users = await _userRepository.GetUsers();
